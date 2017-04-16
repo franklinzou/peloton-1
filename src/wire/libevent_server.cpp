@@ -25,7 +25,7 @@ namespace peloton {
 namespace wire {
 
 int LibeventServer::recent_connfd = -1;
-SSL_CTX LibeventServer::ssl_context = nullptr;
+SSL_CTX *LibeventServer::ssl_context = nullptr;
 
 std::unordered_map<int, std::unique_ptr<LibeventSocket>> &
 LibeventServer::GetGlobalSocketList() {
