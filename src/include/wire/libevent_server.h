@@ -37,6 +37,8 @@
 #include "wire/libevent_thread.h"
 #include "wire/packet_manager.h"
 
+#include <openssl/ssl.h>
+
 #define QUEUE_SIZE 100
 #define MASTER_THREAD_ID -1
 
@@ -49,6 +51,7 @@ class LibeventThread;
 // Libevent Thread States
 enum ConnState {
   CONN_LISTENING,  // State that listens for new connections
+  CONN_SSL_LISTENING,   // State that listens for new SSL connections
   CONN_READ,       // State that reads data from the network
   CONN_WRITE,      // State the writes data to the network
   CONN_WAIT,       // State for waiting for some event to happen
@@ -134,12 +137,14 @@ struct NewConnQueueItem {
   int new_conn_fd;
   short event_flags;
   ConnState init_state;
+  SSL *conn_SSL_context;
 
   inline NewConnQueueItem(int new_conn_fd, short event_flags,
-                          ConnState init_state)
+                          ConnState init_state, SSL *conn_SSL_context)
       : new_conn_fd(new_conn_fd),
         event_flags(event_flags),
-        init_state(init_state) {}
+        init_state(init_state),
+        conn_SSL_context(conn_SSL_context){}
 };
 
 /*
@@ -152,6 +157,8 @@ class LibeventSocket {
   int sock_fd;                    // socket file descriptor
   struct event *event = nullptr;  // libevent handle
   short event_flags;              // event flags mask
+
+  SSL* conn_SSL_context;          // SSL context for the connection
 
   LibeventThread *thread;          // reference to the libevent thread
   PacketManager pkt_manager;       // Stores state for this socket
@@ -173,15 +180,15 @@ class LibeventSocket {
 
  public:
   inline LibeventSocket(int sock_fd, short event_flags, LibeventThread *thread,
-                        ConnState init_state)
+                        ConnState init_state, SSL *conn_SSL_context)
       : sock_fd(sock_fd) {
-    Init(event_flags, thread, init_state);
+    Init(event_flags, thread, init_state, conn_SSL_context);
   }
 
   /* Reuse this object for a new connection. We could be assigned to a
    * new thread, change thread reference.
    */
-  void Init(short event_flags, LibeventThread *thread, ConnState init_state);
+  void Init(short event_flags, LibeventThread *thread, ConnState init_state, SSL *conn_SSL_context);
 
   /* refill_read_buffer - Used to repopulate read buffer with a fresh
    * batch of data from the socket
@@ -226,7 +233,13 @@ struct LibeventServer {
   // static void LogCallback(int severity, const char *msg);
 
   uint64_t port_;           // port number
+  uint64_t ssl_port_;       // ssl port number
   size_t max_connections_;  // maximum number of connections
+
+  // TODO: need to use std::string instead of char *
+  char *private_key_file_;
+  char *certificate_file_;
+
   // struct event_base *base;  // libevent event_base
   struct event *evstop;  // libevent stop event
   struct event *ev_timeout;
@@ -240,11 +253,14 @@ struct LibeventServer {
   struct event_base *base;  // libevent event_base
   static int recent_connfd;
 
+  static SSL_CTX *ssl_context;
+
  public:
   LibeventServer();
   static LibeventSocket *GetConn(const int &connfd);
   static void CreateNewConn(const int &connfd, short ev_flags,
-                            LibeventThread *thread, ConnState init_state);
+                            LibeventThread *thread, ConnState init_state,
+                            SSL *conn_SSL_context);
   void StartServer();
   void CloseServer();
 

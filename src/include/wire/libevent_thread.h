@@ -99,7 +99,7 @@ class LibeventMasterThread : public LibeventThread {
  public:
   LibeventMasterThread(const int num_threads, struct event_base *libevent_base);
 
-  void DispatchConnection(int new_conn_fd, short event_flags);
+  void DispatchConnection(int new_conn_fd, short event_flags, int ssl_conn);
 
   void CloseConnection();
 

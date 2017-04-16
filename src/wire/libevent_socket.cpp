@@ -17,9 +17,11 @@ namespace peloton {
 namespace wire {
 
 void LibeventSocket::Init(short event_flags, LibeventThread *thread,
-                          ConnState init_state) {
+                          ConnState init_state, SSL *conn_SSL_context) {
   SetNonBlocking(sock_fd);
   SetTCPNoDelay(sock_fd);
+
+  this->conn_SSL_context = conn_SSL_context;
 
   this->event_flags = event_flags;
   this->thread = thread;
@@ -47,6 +49,20 @@ void LibeventSocket::Init(short event_flags, LibeventThread *thread,
       PL_ASSERT(false);
     }
   }
+
+  // wrap socket with SSL for SSL connection
+  if (this->conn_SSL_context != nullptr) {
+    if (SSL_set_fd(this->conn_SSL_context, this->sock_fd) == 0) {
+      LOG_ERROR("Failed to set SSL fd");
+      PL_ASSERT(false);
+    }
+  }
+
+  if (SSL_accept(this->conn_SSL_context) <= 0) {
+    LOG_ERROR("Failed to accept (handshake) client SSL context.");
+    PL_ASSERT(false);
+  }
+
   event_add(event, nullptr);
 }
 
@@ -227,9 +243,16 @@ ReadState LibeventSocket::FillReadBuffer() {
       done = true;
     } else {
       // try to fill the available space in the buffer
-      bytes_read = read(sock_fd, rbuf_.GetPtr(rbuf_.buf_size),
+      // if the connection is a SSL connection, we use SSL_read, otherwise
+      // we use general read function
+      if (conn_SSL_context != nullptr) {
+        bytes_read = SSL_read(conn_SSL_context, rbuf_.GetPtr(rbuf_.buf_size),
+                                rbuf_.GetMaxSize() - rbuf_.buf_size);
+      }
+      else {
+        bytes_read = read(sock_fd, rbuf_.GetPtr(rbuf_.buf_size),
                         rbuf_.GetMaxSize() - rbuf_.buf_size);
-
+      }
       if (bytes_read > 0) {
         // read succeeded, update buffer size
         rbuf_.buf_size += bytes_read;
@@ -295,8 +318,14 @@ WriteState LibeventSocket::FlushWriteBuffer() {
   while (wbuf_.buf_size > 0) {
     written_bytes = 0;
     while (written_bytes <= 0) {
-      written_bytes =
+      if (conn_SSL_context != nullptr) {
+        written_bytes =
+            SSL_write(conn_SSL_context, &wbuf_.buf[wbuf_.buf_flush_ptr], wbuf_.buf_size);
+      }
+      else {
+        written_bytes =
           write(sock_fd, &wbuf_.buf[wbuf_.buf_flush_ptr], wbuf_.buf_size);
+      }
       // Write failed
       if (written_bytes < 0) {
         switch (errno) {

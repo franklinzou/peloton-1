@@ -47,13 +47,13 @@ void WorkerHandleNewConn(evutil_socket_t new_conn_recv_fd,
         /* create a new connection object */
         LibeventServer::CreateNewConn(item->new_conn_fd, item->event_flags,
                                       static_cast<LibeventThread *>(thread),
-                                      CONN_READ);
+                                      CONN_READ, item->conn_SSL_context);
       } else {
         LOG_DEBUG("Reusing socket fd:%d", item->new_conn_fd);
         /* otherwise reset and reuse the existing conn object */
         conn->Reset();
         conn->Init(item->event_flags, static_cast<LibeventThread *>(thread),
-                    CONN_READ);
+                    CONN_READ, item->conn_SSL_context);
       }
       break;
     }
@@ -90,7 +90,10 @@ void StateMachine(LibeventSocket *conn) {
         done = true;
         break;
       }
-
+      case CONN_SSL_LISTENING: {
+        // TODO: add SSL wrapper logic
+        break;
+      }
       case CONN_READ: {
         auto res = conn->FillReadBuffer();
         switch (res) {
