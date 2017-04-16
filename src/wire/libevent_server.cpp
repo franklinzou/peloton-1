@@ -153,7 +153,7 @@ void LibeventServer::StartServer() {
     }
 
     LibeventServer::CreateNewConn(listen_fd, EV_READ | EV_PERSIST,
-                                  master_thread.get(), CONN_LISTENING);
+                                  master_thread.get(), CONN_LISTENING, nullptr);
 
     LOG_INFO("Listening on port %lu", port_);
 
@@ -209,7 +209,7 @@ void LibeventServer::StartServer() {
     }
 
     LibeventServer::CreateNewConn(ssl_listen_fd, EV_READ | EV_PERSIST,
-                                  master_thread.get(), CONN_SSL_LISTENING);
+                                  master_thread.get(), CONN_SSL_LISTENING, nullptr);
 
     event_base_dispatch(base);
     event_free(evstop);

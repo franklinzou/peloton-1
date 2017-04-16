@@ -86,12 +86,20 @@ void StateMachine(LibeventSocket *conn) {
           LOG_ERROR("Failed to accept");
         }
         (static_cast<LibeventMasterThread *>(conn->thread))
-            ->DispatchConnection(new_conn_fd, EV_READ | EV_PERSIST);
+            ->DispatchConnection(new_conn_fd, EV_READ | EV_PERSIST, 0);
         done = true;
         break;
       }
       case CONN_SSL_LISTENING: {
-        // TODO: add SSL wrapper logic
+        struct sockaddr_storage addr;
+        socklen_t addrlen = sizeof(addr);
+        int new_conn_fd =
+            accept(conn->sock_fd, (struct sockaddr *)&addr, &addrlen);
+        if (new_conn_fd == -1) {
+          LOG_ERROR("Failed to accept");
+        }
+        (static_cast<LibeventMasterThread *>(conn->thread))
+            ->DispatchConnection(new_conn_fd, EV_READ | EV_PERSIST, 1);
         break;
       }
       case CONN_READ: {
