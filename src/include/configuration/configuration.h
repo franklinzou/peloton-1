@@ -34,7 +34,7 @@ DECLARE_string(socket_family);
 // Added for SSL only begins
 
 // Peloton SSL port
-DECLARE_string(ssl_port);
+DECLARE_uint64(ssl_port);
 
 // Peloton private key file
 DECLARE_string(private_key_file);
