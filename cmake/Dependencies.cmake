@@ -50,6 +50,9 @@ find_package(PQXX REQUIRED)
 include_directories(SYSTEM ${PQXX_INCLUDE_DIRECTORIES})
 list(APPEND Peloton_LINKER_LIBS ${PQXX_LIBRARIES})
 
+# --[ Open SSL
+list(APPEND Peloton_LINKER_LIBS "-lssl")
+
 # --[ IWYU
 
 # Generate clang compilation database
