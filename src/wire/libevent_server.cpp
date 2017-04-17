@@ -56,6 +56,7 @@ void LibeventServer::CreateNewConn(const int &connfd, short ev_flags,
   }
   global_socket_list[connfd].reset(
       new LibeventSocket(connfd, ev_flags, thread, init_state, conn_SSL_context));
+  LOG_INFO("out create new connection: id = %d", connfd);
 }
 
 /**
