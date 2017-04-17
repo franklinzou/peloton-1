@@ -18,6 +18,7 @@ namespace wire {
 
 void LibeventSocket::Init(short event_flags, LibeventThread *thread,
                           ConnState init_state, SSL *conn_SSL_context) {
+  LOG_INFO("LibeventSocket::Init");
   SetNonBlocking(sock_fd);
   SetTCPNoDelay(sock_fd);
 
@@ -64,6 +65,7 @@ void LibeventSocket::Init(short event_flags, LibeventThread *thread,
   }
 
   event_add(event, nullptr);
+  LOG_INFO("out LibeventSocket::Init");
 }
 
 void LibeventSocket::TransitState(ConnState next_state) {
