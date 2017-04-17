@@ -59,9 +59,11 @@ void LibeventSocket::Init(short event_flags, LibeventThread *thread,
     }
   }
   LOG_INFO("LibeventSocket::Init 4");
-  if (SSL_accept(this->conn_SSL_context) <= 0) {
-    LOG_ERROR("Failed to accept (handshake) client SSL context.");
-    PL_ASSERT(false);
+  if (this->conn_SSL_context != nullptr) {
+    if (SSL_accept(this->conn_SSL_context) <= 0) {
+      LOG_ERROR("Failed to accept (handshake) client SSL context.");
+      PL_ASSERT(false);
+    }
   }
   LOG_INFO("LibeventSocket::Init 5");
   event_add(event, nullptr);
