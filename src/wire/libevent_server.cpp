@@ -168,7 +168,7 @@ void LibeventServer::StartServer() {
     }
 
     /* register private key */
-    if (SSL_CTX_use_PrivateKey_file(ssl_context, private_key_file_,
+    if (SSL_CTX_use_PrivateKey_file(ssl_context, private_key_file_.c_str(),
                                     SSL_FILETYPE_PEM) == 0)
     {
       SSL_CTX_free(ssl_context);
@@ -176,7 +176,7 @@ void LibeventServer::StartServer() {
     }
 
     /* register public key (certificate) */
-    if (SSL_CTX_use_certificate_file(ssl_context, certificate_file_,
+    if (SSL_CTX_use_certificate_file(ssl_context, certificate_file_.c_str(),
                                      SSL_FILETYPE_PEM) == 0)
     {
       SSL_CTX_free(ssl_context);

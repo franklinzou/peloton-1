@@ -31,6 +31,18 @@ DECLARE_uint64(max_connections);
 // Socket family
 DECLARE_string(socket_family);
 
+// Added for SSL only begins
+
+// Peloton SSL port
+DECLARE_string(ssl_port);
+
+// Peloton private key file
+DECLARE_string(private_key_file);
+
+// Peloton certificate file
+DECLARE_string(certificate_file);
+
+// Added for SSL only ends
 //===----------------------------------------------------------------------===//
 // RESOURCE USAGE
 //===----------------------------------------------------------------------===//

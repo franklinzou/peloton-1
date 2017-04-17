@@ -237,8 +237,8 @@ struct LibeventServer {
   size_t max_connections_;  // maximum number of connections
 
   // TODO: need to use std::string instead of char *
-  char *private_key_file_;
-  char *certificate_file_;
+  std::string private_key_file_;
+  std::string certificate_file_;
 
   // struct event_base *base;  // libevent event_base
   struct event *evstop;  // libevent stop event
