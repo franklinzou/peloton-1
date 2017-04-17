@@ -80,6 +80,7 @@ void Status_Callback(UNUSED_ATTRIBUTE evutil_socket_t fd,
 }
 
 LibeventServer::LibeventServer() {
+  LOG_INFO("LibeventServer!");
   base = event_base_new();
 
   // Create our event base
@@ -99,7 +100,7 @@ LibeventServer::LibeventServer() {
   // a master thread is responsible for coordinating worker threads.
   master_thread =
       std::make_shared<LibeventMasterThread>(CONNECTION_THREAD_COUNT, base);
-
+  LOG_INFO("LibeventServer 1!");
   port_ = FLAGS_port;
   // TODO: find the way to input ssl_port parameter
   ssl_port_ = FLAGS_ssl_port;
@@ -107,7 +108,7 @@ LibeventServer::LibeventServer() {
 
   private_key_file_ = FLAGS_private_key_file;
   certificate_file_ = FLAGS_certificate_file;
-
+  LOG_INFO("LibeventServer 2!");
   // For logging purposes
   //  event_enable_debug_mode();
   //  event_set_log_callback(LogCallback);
