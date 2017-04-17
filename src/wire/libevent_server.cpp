@@ -211,6 +211,7 @@ void LibeventServer::StartServer() {
 
     LibeventServer::CreateNewConn(ssl_listen_fd, EV_READ | EV_PERSIST,
                                   master_thread.get(), CONN_SSL_LISTENING, nullptr);
+    LOG_INFO("SSL listening on port %lu", ssl_port_);
 
     event_base_dispatch(base);
     event_free(evstop);
