@@ -23,13 +23,13 @@ void LibeventSocket::Init(short event_flags, LibeventThread *thread,
   SetTCPNoDelay(sock_fd);
 
   this->conn_SSL_context = conn_SSL_context;
-  LOG_INFO("LibeventSocket::Init 1");
+
   this->event_flags = event_flags;
   this->thread = thread;
   this->state = init_state;
 
   this->thread_id = thread->GetThreadID();
-  LOG_INFO("LibeventSocket::Init 2");
+
   // clear out packet
   rpkt.Reset();
   if (event == nullptr) {
@@ -50,7 +50,7 @@ void LibeventSocket::Init(short event_flags, LibeventThread *thread,
       PL_ASSERT(false);
     }
   }
-  LOG_INFO("LibeventSocket::Init 3");
+
   // wrap socket with SSL for SSL connection
   if (this->conn_SSL_context != nullptr) {
     if (SSL_set_fd(this->conn_SSL_context, this->sock_fd) == 0) {
@@ -58,7 +58,7 @@ void LibeventSocket::Init(short event_flags, LibeventThread *thread,
       PL_ASSERT(false);
     }
   }
-  LOG_INFO("LibeventSocket::Init 4");
+
   if (this->conn_SSL_context != nullptr) {
     if (SSL_accept(this->conn_SSL_context) <= 0) {
       LOG_ERROR("Failed to accept (handshake) client SSL context.");
