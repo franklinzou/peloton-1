@@ -168,7 +168,7 @@ void LibeventServer::StartServer() {
       throw ConnectionException("Error creating SSL context.\n");
     }
 
-    LOG_INFO("private key file path %s", private_key_file_);
+    LOG_INFO("private key file path %s", private_key_file_.c_str());
     /* register private key */
     if (SSL_CTX_use_PrivateKey_file(ssl_context, private_key_file_.c_str(),
                                     SSL_FILETYPE_PEM) == 0)
@@ -176,7 +176,7 @@ void LibeventServer::StartServer() {
       SSL_CTX_free(ssl_context);
       throw ConnectionException("Error associating private key.\n");
     }
-    LOG_INFO("certificate file path %s", certificate_file_);
+    LOG_INFO("certificate file path %s", certificate_file_.c_str());
     /* register public key (certificate) */
     if (SSL_CTX_use_certificate_file(ssl_context, certificate_file_.c_str(),
                                      SSL_FILETYPE_PEM) == 0)
