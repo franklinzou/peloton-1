@@ -72,12 +72,12 @@ DEFINE_uint64(ssl_port,
 
 DEFINE_string(private_key_file,
               // TODO: change later
-             "private_key_file",
+             "~/shaokunz.key",
              "path to private key file");
 
 DEFINE_string(certificate_file,
               // TODO: change later
-             "certificate_file",
+             "~/shaokunz.crt",
              "path to certificate file");
 //===----------------------------------------------------------------------===//
 // RESOURCE USAGE
