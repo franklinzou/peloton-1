@@ -38,6 +38,7 @@
 #include "wire/packet_manager.h"
 
 #include <openssl/ssl.h>
+#include <openssl/err.h>
 
 #define QUEUE_SIZE 100
 #define MASTER_THREAD_ID -1
