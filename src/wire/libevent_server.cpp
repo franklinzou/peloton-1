@@ -183,6 +183,7 @@ void LibeventServer::StartServer() {
                                      SSL_FILETYPE_PEM) == 0)
     {
       SSL_CTX_free(ssl_context);
+      ERR_print_errors_fp(stderr);
       throw ConnectionException("Error associating certificate.\n");
     }
 
