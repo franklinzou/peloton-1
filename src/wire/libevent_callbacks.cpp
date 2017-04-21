@@ -96,7 +96,7 @@ void StateMachine(LibeventSocket *conn) {
         int new_conn_fd =
             accept(conn->sock_fd, (struct sockaddr *)&addr, &addrlen);
         if (new_conn_fd == -1) {
-          LOG_ERROR("Failed to accept");
+          LOG_ERROR("Failed to accept with error: %d", errno);
         }
         (static_cast<LibeventMasterThread *>(conn->thread))
             ->DispatchConnection(new_conn_fd, EV_READ | EV_PERSIST, 1);
