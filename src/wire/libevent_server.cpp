@@ -195,6 +195,7 @@ void LibeventServer::StartServer() {
 
     setsockopt(ssl_listen_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
 
+    PL_MEMSET(&ssl_sin, 0, sizeof(ssl_sin));
     ssl_sin.sin_family = AF_INET;
     ssl_sin.sin_port = htons(ssl_port_);
     ssl_sin.sin_addr.s_addr = INADDR_ANY;
