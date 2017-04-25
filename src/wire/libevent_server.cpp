@@ -187,7 +187,7 @@ void LibeventServer::StartServer() {
       throw ConnectionException("Error associating certificate.\n");
     }
 
-    if ((ssl_listen_fd = socket(PF_INET, SOCK_STREAM, 0)) == -1)
+    if ((ssl_listen_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
       SSL_CTX_free(ssl_context);
       throw ConnectionException("Failed creating ssl socket.\n");
