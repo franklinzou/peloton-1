@@ -61,6 +61,7 @@ void LibeventSocket::Init(short event_flags, LibeventThread *thread,
   if (this->conn_SSL_context != nullptr) {
     if (SSL_accept(this->conn_SSL_context) <= 0) {
       LOG_ERROR("Failed to accept (handshake) client SSL context.");
+      ERR_print_errors_fp(stderr);
       PL_ASSERT(false);
     }
   }
