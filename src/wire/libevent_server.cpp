@@ -186,8 +186,8 @@ void LibeventServer::StartServer() {
       ERR_print_errors_fp(stderr);
       throw ConnectionException("Error associating certificate.\n");
     }
-
-    if ((ssl_listen_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+    ssl_listen_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (ssl_listen_fd < 0)
     {
       SSL_CTX_free(ssl_context);
       throw ConnectionException("Failed creating ssl socket.\n");
@@ -200,8 +200,7 @@ void LibeventServer::StartServer() {
     ssl_sin.sin_port = htons(ssl_port_);
     ssl_sin.sin_addr.s_addr = INADDR_ANY;
 
-    if (bind(ssl_listen_fd,
-        (struct sockaddr *) &ssl_sin, sizeof(ssl_sin)))
+    if (bind(ssl_listen_fd, (struct sockaddr *) &ssl_sin, sizeof(ssl_sin)) < 0)
     {
       SSL_CTX_free(ssl_context);
       throw ConnectionException("Failed binding ssl socket.\n");
