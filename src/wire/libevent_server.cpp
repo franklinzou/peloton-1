@@ -193,7 +193,7 @@ void LibeventServer::StartServer() {
       throw ConnectionException("Failed creating ssl socket.\n");
     }
 
-//    setsockopt(ssl_listen_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+    setsockopt(ssl_listen_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
 
     ssl_sin.sin_family = AF_INET;
     ssl_sin.sin_port = htons(ssl_port_);
