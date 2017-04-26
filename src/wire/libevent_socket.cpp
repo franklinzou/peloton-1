@@ -50,21 +50,6 @@ void LibeventSocket::Init(short event_flags, LibeventThread *thread,
     }
   }
 
-  // wrap socket with SSL for SSL connection
-  if (this->conn_SSL_context != nullptr) {
-    if (SSL_set_fd(this->conn_SSL_context, this->sock_fd) == 0) {
-      LOG_ERROR("Failed to set SSL fd");
-      PL_ASSERT(false);
-    }
-  }
-
-  if (this->conn_SSL_context != nullptr) {
-    if (SSL_accept(this->conn_SSL_context) <= 0) {
-      LOG_ERROR("Failed to accept (handshake) client SSL context.");
-      ERR_print_errors_fp(stderr);
-      PL_ASSERT(false);
-    }
-  }
   event_add(event, nullptr);
 }
 

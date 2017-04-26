@@ -141,9 +141,20 @@ void LibeventMasterThread::DispatchConnection(int new_conn_fd,
 
   // TODO: consider free conn_SSL_context
   SSL *conn_SSL_context = nullptr;
-  if(ssl_conn)
+  if(ssl_conn) {
     conn_SSL_context = SSL_new(LibeventServer::ssl_context);
-
+      // wrap socket with SSL for SSL connection
+      if (SSL_set_fd(conn_SSL_context, new_conn_fd) == 0) {
+        LOG_ERROR("Failed to set SSL fd");
+        PL_ASSERT(false);
+      }
+      if (SSL_accept(conn_SSL_context) <= 0) {
+        LOG_ERROR("Failed to accept (handshake) client SSL context.");
+        ERR_print_errors_fp(stderr);
+        PL_ASSERT(false);
+      }
+    }
+  }
   std::shared_ptr<NewConnQueueItem> item(
       new NewConnQueueItem(new_conn_fd, event_flags, CONN_READ, conn_SSL_context));
   worker_thread->new_conn_queue.Enqueue(item);
