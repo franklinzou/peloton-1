@@ -72,12 +72,12 @@ DEFINE_uint64(ssl_port,
 
 DEFINE_string(private_key_file,
               // TODO: change later
-             "/home/vagrant/shaokunz.key",
+             "/home/vagrant/temp/server.key",
              "path to private key file");
 
 DEFINE_string(certificate_file,
               // TODO: change later
-             "/home/vagrant/shaokunz.crt",
+             "/home/vagrant/temp/server.crt",
              "path to certificate file");
 //===----------------------------------------------------------------------===//
 // RESOURCE USAGE
