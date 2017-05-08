@@ -145,7 +145,7 @@ int PacketManager::ProcessInitialPacket(InputPacket *pkt) {
       res_base = -1;
   }
   else {
-    res = ProcessStartupPacket(pkt);
+    res = ProcessStartupPacket(pkt, proto_version);
     if (!res)
       res_base = 0;
     else
