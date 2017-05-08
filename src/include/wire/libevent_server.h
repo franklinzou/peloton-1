@@ -231,7 +231,7 @@ struct LibeventServer {
   // static void LogCallback(int severity, const char *msg);
 
   uint64_t port_;           // port number
-  uint64_t ssl_port_;       // ssl port number
+//  uint64_t ssl_port_;       // ssl port number
   size_t max_connections_;  // maximum number of connections
 
   // TODO: need to use std::string instead of char *

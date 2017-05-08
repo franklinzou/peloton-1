@@ -66,10 +66,6 @@ DEFINE_string(socket_family,
               "AF_INET",
               "Socket family (default: AF_INET)");
 
-DEFINE_uint64(ssl_port,
-              15722,
-              "Peloton SSL port (default: 15722)");
-
 DEFINE_string(private_key_file,
               // TODO: change later
              "/home/vagrant/temp/server.key",

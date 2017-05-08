@@ -102,7 +102,7 @@ LibeventServer::LibeventServer() {
 
   port_ = FLAGS_port;
   // TODO: find the way to input ssl_port parameter
-  ssl_port_ = FLAGS_ssl_port;
+//  ssl_port_ = FLAGS_ssl_port;
   max_connections_ = FLAGS_max_connections;
 
   private_key_file_ = FLAGS_private_key_file;
