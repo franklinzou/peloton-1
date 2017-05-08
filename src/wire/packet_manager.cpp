@@ -134,7 +134,7 @@ int PacketManager::ProcessInitialPacket(InputPacket *pkt) {
 
   int32_t proto_version = PacketGetInt(pkt, sizeof(int32_t));
   int32_t minor_prot_version = PacketGetInt(pkt, sizeof(int32_t));
-
+  LOG_INFO("major and minor protocol version: %d %d", proto_version, minor_prot_version);
   bool res;
   int res_base = 0;
   // TODO: consider more about return value

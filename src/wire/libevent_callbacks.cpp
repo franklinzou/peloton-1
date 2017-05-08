@@ -149,9 +149,9 @@ void StateMachine(LibeventSocket *conn) {
           // We need to handle startup packet first
           int status_res = conn->pkt_manager.ProcessInitialPacket(&conn->rpkt);
           status = (status_res != 0);
-          if(status_res == 1)
+          if (status_res == 1)
             conn->pkt_manager.is_started = true;
-          else {
+          else if (status_res == -1){
             // start SSL handshake
             // TODO: consider free conn_SSL_context
             conn->conn_SSL_context = SSL_new(LibeventServer::ssl_context);

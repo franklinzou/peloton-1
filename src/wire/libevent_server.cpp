@@ -170,23 +170,23 @@ void LibeventServer::StartServer() {
       ERR_print_errors_fp(stderr);
       throw ConnectionException("Error associating certificate.\n");
     }
-
-    if (bind(listen_fd, (struct sockaddr *)&sin, sizeof(sin)) < 0) {
-      throw ConnectionException("Failed to bind socket to port: " +
-                                std::to_string(port_));
-    }
-
 //
-//    if (bind(listen_fd, (struct sockaddr *) &sin, sizeof(sin)) < 0)
-//    {
-//      SSL_CTX_free(ssl_context);
-//      throw ConnectionException("Failed binding ssl socket.\n");
+//    if (bind(listen_fd, (struct sockaddr *)&sin, sizeof(sin)) < 0) {
+//      throw ConnectionException("Failed to bind socket to port: " +
+//                                std::to_string(port_));
 //    }
+
+
+    if (bind(listen_fd, (struct sockaddr *) &sin, sizeof(sin)) < 0)
+    {
+      SSL_CTX_free(ssl_context);
+      throw ConnectionException("Failed binding socket.\n");
+    }
 
     if (listen(listen_fd, conn_backlog) < 0)
     {
       SSL_CTX_free(ssl_context);
-      throw ConnectionException("Error listening on ssl socket.\n");
+      throw ConnectionException("Error listening onsocket.\n");
     }
 //
 //
