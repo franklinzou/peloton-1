@@ -257,8 +257,7 @@ struct LibeventServer {
   LibeventServer();
   static LibeventSocket *GetConn(const int &connfd);
   static void CreateNewConn(const int &connfd, short ev_flags,
-                            LibeventThread *thread, ConnState init_state,
-                            SSL *conn_SSL_context);
+                            LibeventThread *thread, ConnState init_state);
   void StartServer();
   void CloseServer();
 
