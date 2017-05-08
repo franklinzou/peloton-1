@@ -196,7 +196,7 @@ void LibeventServer::StartServer() {
 //    }
 
     LibeventServer::CreateNewConn(listen_fd, EV_READ | EV_PERSIST,
-                                  master_thread.get(), CONN_LISTENING, nullptr);
+                                  master_thread.get(), CONN_LISTENING);
 
     LOG_INFO("Listening on port %lu", port_);
 
