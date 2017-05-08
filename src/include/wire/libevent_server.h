@@ -52,7 +52,6 @@ class LibeventThread;
 // Libevent Thread States
 enum ConnState {
   CONN_LISTENING,  // State that listens for new connections
-  CONN_SSL_LISTENING,   // State that listens for new SSL connections
   CONN_READ,       // State that reads data from the network
   CONN_WRITE,      // State the writes data to the network
   CONN_WAIT,       // State for waiting for some event to happen
@@ -138,14 +137,12 @@ struct NewConnQueueItem {
   int new_conn_fd;
   short event_flags;
   ConnState init_state;
-  SSL *conn_SSL_context;
 
   inline NewConnQueueItem(int new_conn_fd, short event_flags,
-                          ConnState init_state, SSL *conn_SSL_context)
+                          ConnState init_state)
       : new_conn_fd(new_conn_fd),
         event_flags(event_flags),
-        init_state(init_state),
-        conn_SSL_context(conn_SSL_context){}
+        init_state(init_state){}
 };
 
 /*
@@ -181,15 +178,15 @@ class LibeventSocket {
 
  public:
   inline LibeventSocket(int sock_fd, short event_flags, LibeventThread *thread,
-                        ConnState init_state, SSL *conn_SSL_context)
+                        ConnState init_state)
       : sock_fd(sock_fd) {
-    Init(event_flags, thread, init_state, conn_SSL_context);
+    Init(event_flags, thread, init_state);
   }
 
   /* Reuse this object for a new connection. We could be assigned to a
    * new thread, change thread reference.
    */
-  void Init(short event_flags, LibeventThread *thread, ConnState init_state, SSL *conn_SSL_context);
+  void Init(short event_flags, LibeventThread *thread, ConnState init_state);
 
   /* refill_read_buffer - Used to repopulate read buffer with a fresh
    * batch of data from the socket

@@ -47,13 +47,13 @@ void WorkerHandleNewConn(evutil_socket_t new_conn_recv_fd,
         /* create a new connection object */
         LibeventServer::CreateNewConn(item->new_conn_fd, item->event_flags,
                                       static_cast<LibeventThread *>(thread),
-                                      CONN_READ, item->conn_SSL_context);
+                                      CONN_READ);
       } else {
         LOG_DEBUG("Reusing socket fd:%d", item->new_conn_fd);
         /* otherwise reset and reuse the existing conn object */
         conn->Reset();
         conn->Init(item->event_flags, static_cast<LibeventThread *>(thread),
-                    CONN_READ, item->conn_SSL_context);
+                    CONN_READ);
       }
       break;
     }
@@ -86,20 +86,8 @@ void StateMachine(LibeventSocket *conn) {
           LOG_ERROR("Failed to accept");
         }
         (static_cast<LibeventMasterThread *>(conn->thread))
-            ->DispatchConnection(new_conn_fd, EV_READ | EV_PERSIST, 0);
+            ->DispatchConnection(new_conn_fd, EV_READ | EV_PERSIST);
         done = true;
-        break;
-      }
-      case CONN_SSL_LISTENING: {
-        struct sockaddr_storage addr;
-        socklen_t addrlen = sizeof(addr);
-        int new_conn_fd =
-            accept(conn->sock_fd, (struct sockaddr *)&addr, &addrlen);
-        if (new_conn_fd == -1) {
-          LOG_ERROR("Failed to accept with error: %d", errno);
-        }
-        (static_cast<LibeventMasterThread *>(conn->thread))
-            ->DispatchConnection(new_conn_fd, EV_READ | EV_PERSIST, 1);
         break;
       }
       case CONN_READ: {
@@ -159,8 +147,25 @@ void StateMachine(LibeventSocket *conn) {
 
         if (conn->pkt_manager.is_started == false) {
           // We need to handle startup packet first
-          status = conn->pkt_manager.ProcessStartupPacket(&conn->rpkt);
-          conn->pkt_manager.is_started = true;
+          int status_res = conn->pkt_manager.ProcessInitialPacket(&conn->rpkt);
+          status = (status_res != 0);
+          if(status_res == 1)
+            conn->pkt_manager.is_started = true;
+          else {
+            // start SSL handshake
+            // TODO: consider free conn_SSL_context
+            conn->conn_SSL_context = SSL_new(LibeventServer::ssl_context);
+            if (SSL_set_fd(conn->conn_SSL_context, conn->sock_fd) == 0) {
+              LOG_ERROR("Failed to set SSL fd");
+              PL_ASSERT(false);
+            }
+            if (SSL_accept(conn->conn_SSL_context) <= 0) {
+              LOG_ERROR("Failed to accept (handshake) client SSL context.");
+              ERR_print_errors_fp(stderr);
+              // TODO: consider more about proper action
+              conn->TransitState(CONN_CLOSED);
+            }
+          }
         } else {
           // Process all other packets
           status = conn->pkt_manager.ProcessPacket(&conn->rpkt, (size_t)conn->thread_id);

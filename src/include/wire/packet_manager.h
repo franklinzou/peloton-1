@@ -41,7 +41,11 @@ class PacketManager {
   ~PacketManager();
 
   /* Startup packet processing logic */
+  int ProcessInitialPacket(InputPacket* pkt);
+
   bool ProcessStartupPacket(InputPacket* pkt);
+
+  bool ProcessSSLRequestPacket(InputPacket *pkt);
 
   /* Main switch case wrapper to process every packet apart from the startup
    * packet. Avoid flushing the response for extended protocols. */

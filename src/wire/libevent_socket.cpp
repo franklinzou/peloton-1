@@ -17,11 +17,9 @@ namespace peloton {
 namespace wire {
 
 void LibeventSocket::Init(short event_flags, LibeventThread *thread,
-                          ConnState init_state, SSL *conn_SSL_context) {
+                          ConnState init_state) {
   SetNonBlocking(sock_fd);
   SetTCPNoDelay(sock_fd);
-
-  this->conn_SSL_context = conn_SSL_context;
 
   this->event_flags = event_flags;
   this->thread = thread;

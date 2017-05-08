@@ -47,15 +47,14 @@ LibeventSocket *LibeventServer::GetConn(const int &connfd) {
 
 void LibeventServer::CreateNewConn(const int &connfd, short ev_flags,
                                    LibeventThread *thread,
-                                   ConnState init_state,
-                                   SSL *conn_SSL_context) {
+                                   ConnState init_state) {
   auto &global_socket_list = GetGlobalSocketList();
   recent_connfd = connfd;
   if (global_socket_list.find(connfd) == global_socket_list.end()) {
     LOG_INFO("create new connection: id = %d", connfd);
   }
   global_socket_list[connfd].reset(
-      new LibeventSocket(connfd, ev_flags, thread, init_state, conn_SSL_context));
+      new LibeventSocket(connfd, ev_flags, thread, init_state));
   LOG_INFO("out create new connection: id = %d", connfd);
 }
 
@@ -125,14 +124,14 @@ LibeventServer::LibeventServer() {
 void LibeventServer::StartServer() {
   LOG_INFO("Begin to start server\n");
   if (FLAGS_socket_family == "AF_INET") {
-    struct sockaddr_in sin, ssl_sin;
+    struct sockaddr_in sin;
 
     PL_MEMSET(&sin, 0, sizeof(sin));
     sin.sin_family = AF_INET;
     sin.sin_addr.s_addr = INADDR_ANY;
     sin.sin_port = htons(port_);
 
-    int listen_fd, ssl_listen_fd;
+    int listen_fd;
 
     listen_fd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -143,25 +142,9 @@ void LibeventServer::StartServer() {
     int reuse = 1;
     setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
 
-    if (bind(listen_fd, (struct sockaddr *)&sin, sizeof(sin)) < 0) {
-      throw ConnectionException("Failed to bind socket to port: " +
-                                std::to_string(port_));
-    }
-
-    int conn_backlog = 12;
-    if (listen(listen_fd, conn_backlog) < 0) {
-      throw ConnectionException("Failed to listen to socket");
-    }
-
-    LibeventServer::CreateNewConn(listen_fd, EV_READ | EV_PERSIST,
-                                  master_thread.get(), CONN_LISTENING, nullptr);
-
-    LOG_INFO("Listening on port %lu", port_);
-
     /* Initialize SSL listener connection */
     SSL_load_error_strings();
     SSL_library_init();
-
 
     if ((ssl_context = SSL_CTX_new(TLSv1_server_method())) == NULL)
     {
@@ -186,35 +169,41 @@ void LibeventServer::StartServer() {
       ERR_print_errors_fp(stderr);
       throw ConnectionException("Error associating certificate.\n");
     }
-    ssl_listen_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (ssl_listen_fd < 0)
-    {
-      SSL_CTX_free(ssl_context);
-      throw ConnectionException("Failed creating ssl socket.\n");
+
+    if (bind(listen_fd, (struct sockaddr *)&sin, sizeof(sin)) < 0) {
+      throw ConnectionException("Failed to bind socket to port: " +
+                                std::to_string(port_));
     }
 
-    setsockopt(ssl_listen_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+    int conn_backlog = 12;
 
-    PL_MEMSET(&ssl_sin, 0, sizeof(ssl_sin));
-    ssl_sin.sin_family = AF_INET;
-    ssl_sin.sin_port = htons(ssl_port_);
-    ssl_sin.sin_addr.s_addr = INADDR_ANY;
 
-    if (bind(ssl_listen_fd, (struct sockaddr *) &ssl_sin, sizeof(ssl_sin)) < 0)
+    if (bind(listen_fd, (struct sockaddr *) &sin, sizeof(sin)) < 0)
     {
       SSL_CTX_free(ssl_context);
       throw ConnectionException("Failed binding ssl socket.\n");
     }
 
-    if (listen(ssl_listen_fd, conn_backlog) < 0)
+    if (listen(listen_fd, conn_backlog) < 0)
     {
       SSL_CTX_free(ssl_context);
       throw ConnectionException("Error listening on ssl socket.\n");
     }
+//
+//
+//    if (listen(listen_fd, conn_backlog) < 0) {
+//      throw ConnectionException("Failed to listen to socket");
+//    }
 
-    LibeventServer::CreateNewConn(ssl_listen_fd, EV_READ | EV_PERSIST,
-                                  master_thread.get(), CONN_SSL_LISTENING, nullptr);
-    LOG_INFO("SSL listening on port %lu", ssl_port_);
+    LibeventServer::CreateNewConn(listen_fd, EV_READ | EV_PERSIST,
+                                  master_thread.get(), CONN_LISTENING, nullptr);
+
+    LOG_INFO("Listening on port %lu", port_);
+
+
+//    LibeventServer::CreateNewConn(ssl_listen_fd, EV_READ | EV_PERSIST,
+//                                  master_thread.get(), CONN_SSL_LISTENING, nullptr);
+//    LOG_INFO("SSL listening on port %lu", ssl_port_);
 
     event_base_dispatch(base);
     event_free(evstop);
@@ -222,7 +211,7 @@ void LibeventServer::StartServer() {
     event_base_free(base);
     static_cast<LibeventMasterThread *>(master_thread.get())->CloseConnection();
     LibeventServer::GetConn(listen_fd)->CloseSocket();
-    LibeventServer::GetConn(ssl_listen_fd)->CloseSocket();
+//    LibeventServer::GetConn(ssl_listen_fd)->CloseSocket();
     LOG_INFO("Server Closed");
   }
 
