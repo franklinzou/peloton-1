@@ -137,7 +137,7 @@ int PacketManager::ProcessInitialPacket(InputPacket *pkt) {
   bool res;
   int res_base = 0;
   // TODO: consider more about return value
-  if (PROTO_MAJOR_VERSION(proto_version) == 80877103) {
+  if (proto_version == 80877103) {
     res = ProcessSSLRequestPacket(pkt);
     if (!res)
       res_base = 0;
@@ -155,11 +155,11 @@ int PacketManager::ProcessInitialPacket(InputPacket *pkt) {
   return res_base;
 }
 
-bool PacketManager::ProcessStartupPacket(InputPacket* pkt) {
+bool PacketManager::ProcessStartupPacket(InputPacket* pkt, int32_t proto_version) {
   std::string token, value;
   std::unique_ptr<OutputPacket> response(new OutputPacket());
 
-  int32_t proto_version = PacketGetInt(pkt, sizeof(int32_t));
+//  int32_t proto_version = PacketGetInt(pkt, sizeof(int32_t));
   // Only protocol version 3 is supported
   if (PROTO_MAJOR_VERSION(proto_version) != 3) {
     LOG_ERROR("Protocol error: Only protocol version 3 is supported.");

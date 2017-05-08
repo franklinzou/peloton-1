@@ -43,7 +43,7 @@ class PacketManager {
   /* Startup packet processing logic */
   int ProcessInitialPacket(InputPacket* pkt);
 
-  bool ProcessStartupPacket(InputPacket* pkt);
+  bool ProcessStartupPacket(InputPacket* pkt, int32_t proto_version);
 
   bool ProcessSSLRequestPacket(InputPacket *pkt);
 
