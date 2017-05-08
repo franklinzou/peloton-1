@@ -133,12 +133,11 @@ int PacketManager::ProcessInitialPacket(InputPacket *pkt) {
   std::unique_ptr<OutputPacket> response(new OutputPacket());
 
   int32_t proto_version = PacketGetInt(pkt, sizeof(int32_t));
-  int32_t minor_prot_version = PacketGetInt(pkt, sizeof(int32_t));
-  LOG_INFO("major and minor protocol version: %d %d", proto_version, minor_prot_version);
+  LOG_INFO("protocol version: %d", proto_version);
   bool res;
   int res_base = 0;
   // TODO: consider more about return value
-  if (PROTO_MAJOR_VERSION(proto_version) == 1234 && minor_prot_version == 5679) {
+  if (PROTO_MAJOR_VERSION(proto_version) == 80877103) {
     res = ProcessSSLRequestPacket(pkt);
     if (!res)
       res_base = 0;
