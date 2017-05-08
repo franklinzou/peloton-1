@@ -139,6 +139,7 @@ void LibeventServer::StartServer() {
       throw ConnectionException("Failed to create listen socket");
     }
 
+    int conn_backlog = 12;
     int reuse = 1;
     setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
 
@@ -175,14 +176,12 @@ void LibeventServer::StartServer() {
                                 std::to_string(port_));
     }
 
-    int conn_backlog = 12;
-
-
-    if (bind(listen_fd, (struct sockaddr *) &sin, sizeof(sin)) < 0)
-    {
-      SSL_CTX_free(ssl_context);
-      throw ConnectionException("Failed binding ssl socket.\n");
-    }
+//
+//    if (bind(listen_fd, (struct sockaddr *) &sin, sizeof(sin)) < 0)
+//    {
+//      SSL_CTX_free(ssl_context);
+//      throw ConnectionException("Failed binding ssl socket.\n");
+//    }
 
     if (listen(listen_fd, conn_backlog) < 0)
     {
