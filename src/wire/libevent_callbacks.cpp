@@ -163,10 +163,10 @@ void StateMachine(LibeventSocket *conn) {
             int ssl_accept_ret;
             if ((ssl_accept_ret = SSL_accept(conn->conn_SSL_context)) <= 0) {
               LOG_ERROR("Failed to accept (handshake) client SSL context.");
-              PL_ASSERT(false);
               LOG_ERROR("ssl error: %d", SSL_get_error(conn->conn_SSL_context, ssl_accept_ret));
 //              ERR_print_errors_fp(stderr);
               // TODO: consider more about proper action
+              PL_ASSERT(false);
               conn->TransitState(CONN_CLOSED);
             }
           }
