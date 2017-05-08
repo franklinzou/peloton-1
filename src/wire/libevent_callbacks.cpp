@@ -16,6 +16,7 @@
 #include "wire/libevent_server.h"
 #include "common/macros.h"
 
+
 namespace peloton {
 namespace wire {
 
@@ -159,9 +160,12 @@ void StateMachine(LibeventSocket *conn) {
               LOG_ERROR("Failed to set SSL fd");
               PL_ASSERT(false);
             }
-            if (SSL_accept(conn->conn_SSL_context) <= 0) {
+            int ssl_accept_ret;
+            if ((ssl_accept_ret = SSL_accept(conn->conn_SSL_context)) <= 0) {
               LOG_ERROR("Failed to accept (handshake) client SSL context.");
-              ERR_print_errors_fp(stderr);
+              PL_ASSERT(false);
+              LOG_ERROR("ssl error: %d", SSL_get_error(conn->conn_SSL_context, ssl_accept_ret));
+//              ERR_print_errors_fp(stderr);
               // TODO: consider more about proper action
               conn->TransitState(CONN_CLOSED);
             }
