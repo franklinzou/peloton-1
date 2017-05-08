@@ -30,6 +30,7 @@
 #include "wire/marshal.h"
 
 #define PROTO_MAJOR_VERSION(x) x >> 16
+#define UNUSED(x) (void)(x)
 
 namespace peloton {
 namespace wire {
@@ -210,6 +211,7 @@ bool PacketManager::ProcessStartupPacket(InputPacket* pkt) {
 }
 
 bool PacketManager::ProcessSSLRequestPacket(InputPacket *pkt) {
+  UNUSED(pkt);
   std::unique_ptr<OutputPacket> response(new OutputPacket());
   // TODO: consider more about a proper response
   response->msg_type = NetworkMessageType::SSL_YES;
