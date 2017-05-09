@@ -92,7 +92,7 @@ class PacketManager {
 
   // has the startup packet been received for this connection
   bool is_started = false;
-
+  bool ssl_sent = false;
   // Should we send the buffered packets right away?
   bool force_flush = false;
 
