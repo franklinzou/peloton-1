@@ -129,6 +129,7 @@ void StateMachine(LibeventSocket *conn) {
         bool status;
 
         if(conn->pkt_manager.ssl_sent) {
+            sleep(10);
             // start SSL handshake
             // TODO: consider free conn_SSL_context
             conn->conn_SSL_context = SSL_new(LibeventServer::ssl_context);
