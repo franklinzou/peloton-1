@@ -215,7 +215,7 @@ bool PacketManager::ProcessSSLRequestPacket(InputPacket *pkt) {
   // TODO: consider more about a proper response
   response->msg_type = NetworkMessageType::SSL_YES;
   responses.push_back(std::move(response));
-
+  LOG_INFO("Queue size becomes: %lu", responses.size());
   force_flush = true;
   return true;
 }
