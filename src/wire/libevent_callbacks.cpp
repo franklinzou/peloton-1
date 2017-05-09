@@ -77,8 +77,8 @@ void StateMachine(LibeventSocket *conn) {
   bool done = false;
 
   while (done == false) {
+    LOG_INFO("current state: %d", conn->state);
     switch (conn->state) {
-      LOG_INFO("current state: %d", conn->state);
       case CONN_LISTENING: {
         struct sockaddr_storage addr;
         socklen_t addrlen = sizeof(addr);
