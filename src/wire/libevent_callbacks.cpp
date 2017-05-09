@@ -165,6 +165,7 @@ void StateMachine(LibeventSocket *conn) {
                 PL_ASSERT(false);
                 conn->TransitState(CONN_CLOSED);
               }
+              LOG_ERROR("SSL handshake completed");
               conn->pkt_manager.ssl_sent = false;
           }
           else {
