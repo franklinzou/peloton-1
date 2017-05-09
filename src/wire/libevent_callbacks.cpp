@@ -127,6 +127,29 @@ void StateMachine(LibeventSocket *conn) {
 
       case CONN_PROCESS : {
         bool status;
+
+        if(conn->pkt_manager.ssl_sent) {
+            // start SSL handshake
+            // TODO: consider free conn_SSL_context
+            conn->conn_SSL_context = SSL_new(LibeventServer::ssl_context);
+            if (SSL_set_fd(conn->conn_SSL_context, conn->sock_fd) == 0) {
+              LOG_ERROR("Failed to set SSL fd");
+              PL_ASSERT(false);
+            }
+            int ssl_accept_ret;
+            if ((ssl_accept_ret = SSL_accept(conn->conn_SSL_context)) <= 0) {
+              LOG_ERROR("Failed to accept (handshake) client SSL context.");
+              LOG_ERROR("ssl error: %d", SSL_get_error(conn->conn_SSL_context, ssl_accept_ret));
+              LOG_ERROR("general error: %lu", ERR_get_error());
+              ERR_print_errors_fp(stderr);
+              // TODO: consider more about proper action
+              PL_ASSERT(false);
+              conn->TransitState(CONN_CLOSED);
+            }
+            LOG_ERROR("SSL handshake completed");
+            conn->pkt_manager.ssl_sent = false;
+        }
+
         if (conn->rpkt.header_parsed == false) {
           // parse out the header first
           if (conn->ReadPacketHeader() == false) {
@@ -148,36 +171,13 @@ void StateMachine(LibeventSocket *conn) {
         PL_ASSERT(conn->rpkt.is_initialized == true);
 
         if (conn->pkt_manager.is_started == false) {
-          if(conn->pkt_manager.ssl_sent) {
-              // start SSL handshake
-              // TODO: consider free conn_SSL_context
-              conn->conn_SSL_context = SSL_new(LibeventServer::ssl_context);
-              if (SSL_set_fd(conn->conn_SSL_context, conn->sock_fd) == 0) {
-                LOG_ERROR("Failed to set SSL fd");
-                PL_ASSERT(false);
-              }
-              int ssl_accept_ret;
-              if ((ssl_accept_ret = SSL_accept(conn->conn_SSL_context)) <= 0) {
-                LOG_ERROR("Failed to accept (handshake) client SSL context.");
-                LOG_ERROR("ssl error: %d", SSL_get_error(conn->conn_SSL_context, ssl_accept_ret));
-                LOG_ERROR("general error: %lu", ERR_get_error());
-                ERR_print_errors_fp(stderr);
-                // TODO: consider more about proper action
-                PL_ASSERT(false);
-                conn->TransitState(CONN_CLOSED);
-              }
-              LOG_ERROR("SSL handshake completed");
-              conn->pkt_manager.ssl_sent = false;
-          }
-          else {
-            // We need to handle startup packet first
-            int status_res = conn->pkt_manager.ProcessInitialPacket(&conn->rpkt);
-            status = (status_res != 0);
-            if (status_res == 1)
-              conn->pkt_manager.is_started = true;
-            else if (status_res == -1){
-              conn->pkt_manager.ssl_sent = true;
-            }
+          // We need to handle startup packet first
+          int status_res = conn->pkt_manager.ProcessInitialPacket(&conn->rpkt);
+          status = (status_res != 0);
+          if (status_res == 1)
+            conn->pkt_manager.is_started = true;
+          else if (status_res == -1){
+            conn->pkt_manager.ssl_sent = true;
           }
         } else {
           // Process all other packets
